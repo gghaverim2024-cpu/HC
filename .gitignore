@@ -1,0 +1,9 @@
+node_modules/
+dist/
+data/
+uploads/
+*.log
+.env
+.env.local
+pid.txt
+vite_pid.txt
