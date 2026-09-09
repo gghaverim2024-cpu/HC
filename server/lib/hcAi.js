@@ -3,24 +3,55 @@ import { serializeServer, publicUser } from './serialize.js';
 import { getCount } from '../realtime/presence.js';
 
 // HC AI — a rule-based (keyword + DB query) recommendation engine, not an
-// external LLM call (no API key configured in this environment). It parses
-// the user's free-text Hebrew/English message for a game name + intent, then
-// queries real data. Swap this module for a real Claude API call later
-// without touching the /api/ai route contract.
+// external LLM call (no ongoing API cost). It parses the user's free-text
+// Hebrew/English message for intent + a game name, then answers from real
+// platform data. It intentionally stays scoped to gaming topics — anything
+// clearly unrelated gets a polite redirect instead of a made-up answer.
+// Swap this module for a real Claude API call later without touching the
+// /api/ai route contract.
 
 const GAME_ALIASES = {
   minecraft: ['מיינקראפט', 'minecraft', 'mc'],
-  fortnite: ['פורטנייט', 'פורטנייט', 'fortnite'],
+  fortnite: ['פורטנייט', 'fortnite'],
   'brawl-stars': ['בראול סטארס', 'בראול', 'brawl stars', 'brawl'],
   roblox: ['רובלוקס', 'roblox'],
   valorant: ['ולורנט', 'valorant'],
   cs2: ['קאונטר', 'קונטר', 'סי אס', 'counter strike', 'cs2', 'cs'],
-  fifa: ['פיפא', 'fifa'],
+  'ea-fc-25': ['פיפא', 'fifa', 'איאף\'סי', 'ea fc', 'eafc'],
+  'rocket-league': ['רוקט ליג', 'rocket league'],
+  'league-of-legends': ['ליג אוף לג\'נדס', 'לול', 'league of legends', 'lol'],
+  'free-fire': ['פרי פייר', 'free fire'],
+  'pubg-mobile': ['פאבג', 'pubg'],
+  'cod-warzone': ['וורזון', 'warzone'],
+  'cod-mobile': ['קול אוף דיוטי', 'call of duty', 'קוד מובייל'],
+  'apex-legends': ['אייפקס', 'apex'],
+  'clash-royale': ['קלאש רויאל', 'clash royale'],
+  'clash-of-clans': ['קלאש אוף קלאנס', 'clash of clans', 'קוק'],
+  'genshin-impact': ['גנשין', 'genshin'],
+  'among-us': ['אמאנג אס', 'among us'],
+  'gta-v': ['גיטיאיי', 'gta', 'גילטה'],
+  'world-of-warcraft': ['וורקראפט', 'wow', 'warcraft'],
+  'dota-2': ['דוטה', 'dota'],
+  'overwatch-2': ['אוברווטש', 'overwatch'],
 };
 
 const LFG_HINTS = ['אנשים', 'שחקנים לשחק', 'סקווד', 'squad', 'קבוצה', 'group', 'party', 'טים', 'team'];
 const SERVER_HINTS = ['שרת', 'server', 'שרתים'];
 const BIG_HINTS = ['הרבה שחקנים', 'הכי גדול', 'פופולרי', 'popular', 'most players', 'גדול'];
+
+const GREETING_HINTS = ['שלום', 'היי', 'הי ', 'מה קורה', 'מה נשמע', 'hello', 'hi ', 'hey', 'yo'];
+const HELP_HINTS = ['מה אתה יודע', 'מי אתה', 'מה זה hc', 'איך אתה עוזר', 'what can you do', 'who are you'];
+const LEVEL_HINTS = ['רמה', 'level', 'xp', 'נקודות ניסיון', 'הישג', 'achievement'];
+const RECOMMEND_GAME_HINTS = ['מה לשחק', 'איזה משחק', 'משחק טוב', 'מה כדאי לשחק', 'what should i play', 'recommend a game'];
+
+// Any message that mentions gaming-adjacent vocabulary counts as on-topic,
+// even if we can't match a specific game/server/LFG intent below.
+const GAMING_SIGNAL_WORDS = [
+  'משחק', 'משחקים', 'לשחק', 'שיחקתי', 'שרת', 'שרתים', 'קהילה', 'קהילות', 'טורניר', 'תחרות',
+  'gaming', 'game', 'games', 'play', 'player', 'players', 'server', 'tournament', 'esports',
+  'hc israel', 'hc ai', ...LFG_HINTS, ...SERVER_HINTS, ...LEVEL_HINTS, ...RECOMMEND_GAME_HINTS,
+  ...Object.values(GAME_ALIASES).flat(),
+];
 
 function detectGame(text) {
   const lower = text.toLowerCase();
@@ -39,24 +70,73 @@ function detectTagKeywords(text) {
   return tags.filter((t) => lower.includes(t));
 }
 
+function hasAny(lower, hints) {
+  return hints.some((h) => lower.includes(h));
+}
+
+function topActiveGames(limit = 3) {
+  const games = all('SELECT * FROM games');
+  const withCounts = games.map((g) => ({ g, count: getCount(`game:${g.id}`) }));
+  withCounts.sort((a, b) => b.count - a.count);
+  return withCounts.slice(0, limit).map((x) => x.g);
+}
+
 export function answerQuery(rawText, { excludeUserId } = {}) {
   const text = (rawText || '').trim();
   if (!text) {
     return { reply: 'ספר לי מה אתה מחפש — שרת, קבוצה למשחק, או קהילה, ואני אמצא לך משהו מתאים.', results: [] };
   }
+  const lower = text.toLowerCase();
 
-  const game = detectGame(text);
-  const wantsLfg = LFG_HINTS.some((h) => text.toLowerCase().includes(h));
-  const wantsServer = SERVER_HINTS.some((h) => text.toLowerCase().includes(h)) || !wantsLfg;
-  const wantsBig = BIG_HINTS.some((h) => text.toLowerCase().includes(h));
-  const tagKeywords = detectTagKeywords(text);
-
-  if (!game) {
+  if (hasAny(lower, GREETING_HINTS) && text.length < 25) {
     return {
-      reply: 'לא הצלחתי לזהות משחק בהודעה שלך. נסה למשל: "אני מחפש שרת Minecraft Survival" או "מחפש אנשים לשחק Fortnite".',
+      reply: 'היי! אני HC AI 🎮 אני יכול לעזור לך למצוא שרתים, שחקנים לשחק איתם, או המלצות במשחקים ב-HC Israel. מה בא לך לעשות?',
       results: [],
     };
   }
+
+  if (hasAny(lower, HELP_HINTS)) {
+    return {
+      reply: 'אני HC AI, העוזר של HC Israel. אני יכול: למצוא לך שרת מתאים למשחק, למצוא שחקנים שמחפשים קבוצה, ולהמליץ על המשחקים הכי פעילים כרגע. נסה לשאול למשל "אני מחפש שרת Minecraft Survival".',
+      results: [],
+    };
+  }
+
+  if (hasAny(lower, LEVEL_HINTS) && !hasAny(lower, SERVER_HINTS)) {
+    return {
+      reply: 'ה-HC Level שלך עולה כשאתה פעיל בפלטפורמה — שולח הודעות, מצטרף לשרתים/קהילות, משתתף באירועים ופותח הישגים. אפשר לראות את ההתקדמות שלך בעמוד הפרופיל.',
+      results: [],
+    };
+  }
+
+  const game = detectGame(text);
+
+  if (!game && hasAny(lower, RECOMMEND_GAME_HINTS)) {
+    const top = topActiveGames(3);
+    if (!top.length) return { reply: 'עדיין אין מספיק נתונים כדי להמליץ — נסה שוב מאוחר יותר.', results: [] };
+    return {
+      reply: `המשחקים הכי פעילים ב-HC Israel כרגע: ${top.map((g) => g.name).join(', ')}. רוצה שאמצא לך שרת או קבוצה לאחד מהם?`,
+      results: [],
+    };
+  }
+
+  if (!game) {
+    if (!hasAny(lower, GAMING_SIGNAL_WORDS)) {
+      return {
+        reply: 'אני HC AI ומתמקד רק בנושאי גיימינג ב-HC Israel 🎮 — אני יכול לעזור לך למצוא משחקים, שרתים, קבוצות או שחקנים. נסה לשאול אותי משהו בכיוון הזה!',
+        results: [],
+      };
+    }
+    return {
+      reply: 'לא הצלחתי לזהות משחק ספציפי בהודעה שלך. נסה למשל: "אני מחפש שרת Minecraft Survival" או "מחפש אנשים לשחק Fortnite".',
+      results: [],
+    };
+  }
+
+  const wantsLfg = hasAny(lower, LFG_HINTS);
+  const wantsServer = hasAny(lower, SERVER_HINTS) || !wantsLfg;
+  const wantsBig = hasAny(lower, BIG_HINTS);
+  const tagKeywords = detectTagKeywords(text);
 
   if (wantsLfg && !wantsServer) {
     let rows = all(

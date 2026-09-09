@@ -17,6 +17,7 @@ function withExtras(s, userId) {
     : false;
   const owner = s.owner_id ? get('SELECT username, avatar_url FROM users WHERE id = ?', [s.owner_id]) : null;
   const chat = get(`SELECT id FROM chats WHERE type='server' AND ref_id = ?`, [s.id]);
+  const game = get('SELECT category FROM games WHERE id = ?', [s.game_id]);
   return serializeServer(s, {
     onlinePlayers: getCount(`server:${s.id}`),
     followers,
@@ -24,6 +25,7 @@ function withExtras(s, userId) {
     ownerName: owner?.username,
     ownerAvatar: owner?.avatar_url,
     chatId: chat?.id,
+    gameCategory: game?.category,
   });
 }
 

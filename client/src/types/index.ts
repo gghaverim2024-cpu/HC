@@ -53,6 +53,7 @@ export interface HcServer {
   ownerName?: string;
   ownerAvatar?: string;
   chatId?: string;
+  gameCategory?: string;
 }
 
 export interface Community {
@@ -138,6 +139,18 @@ export interface AppNotification {
   payload: Record<string, any>;
   read: boolean;
   createdAt: string;
+}
+
+export interface Reel {
+  id: string;
+  videoUrl: string;
+  caption: string;
+  createdAt: string;
+  author: PublicUser;
+  game: { id: string; name: string; slug: string } | null;
+  likes: number;
+  liked: boolean;
+  comments: number;
 }
 
 export interface PresenceSnapshot {

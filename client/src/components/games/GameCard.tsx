@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Server, Users2, MessageCircle, ArrowLeft } from 'lucide-react';
 import { LiveCount } from '../ui/LiveCount';
+import { CoverImage } from '../ui/CoverImage';
 import { formatCompactNumber } from '../../lib/format';
 import type { Game } from '../../types';
 
@@ -18,17 +19,13 @@ export function GameCard({ game, index = 0 }: { game: Game; index?: number }) {
         className="group relative block rounded-2xl overflow-hidden glass hover:border-hc-border-strong transition-all duration-300 hover:-translate-y-1"
       >
         <div className="relative h-40 overflow-hidden">
-          <img
-            src={game.coverUrl || ''}
-            alt={game.name}
+          <CoverImage
+            src={game.coverUrl}
+            name={game.name}
+            category={game.category}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-hc-bg via-hc-bg/30 to-transparent" />
-          <img
-            src={game.logoUrl || ''}
-            alt=""
-            className="absolute bottom-3 right-3 w-10 h-10 rounded-xl border border-white/20 bg-black/40 backdrop-blur-sm"
-          />
         </div>
         <div className="p-4">
           <h3 className="font-bold text-white text-base mb-1.5">{game.name}</h3>

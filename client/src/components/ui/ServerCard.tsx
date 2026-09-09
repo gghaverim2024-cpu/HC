@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Star, Crown } from 'lucide-react';
 import { LiveCount } from './LiveCount';
+import { CoverImage } from './CoverImage';
 import type { HcServer } from '../../types';
 
 export function ServerCard({ server }: { server: HcServer }) {
@@ -10,9 +11,10 @@ export function ServerCard({ server }: { server: HcServer }) {
       className="group block rounded-2xl overflow-hidden glass hover:border-hc-border-strong transition-all duration-300 hover:-translate-y-1"
     >
       <div className="relative h-32">
-        <img
-          src={server.imageUrl || ''}
-          alt={server.name}
+        <CoverImage
+          src={server.imageUrl}
+          name={server.name}
+          category={server.gameCategory}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-hc-bg via-hc-bg/40 to-transparent" />

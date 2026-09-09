@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Users, Trophy } from 'lucide-react';
 import { eventsApi, gamesApi } from '../api';
 import { Button, GlassCard, Skeleton, EmptyState } from '../components/ui/Primitives';
+import { CoverImage } from '../components/ui/CoverImage';
 import { Modal } from '../components/ui/Modal';
 import { useAuthStore } from '../store/authStore';
 import { useUiStore } from '../store/uiStore';
@@ -87,7 +88,7 @@ export function EventsPage() {
         <div className="grid sm:grid-cols-2 gap-4">
           {events.map((ev) => (
             <GlassCard key={ev.id} hover className="overflow-hidden">
-              <img src={ev.imageUrl || ''} className="h-32 w-full object-cover" alt="" />
+              <CoverImage src={ev.imageUrl} name={ev.title} className="h-32 w-full object-cover" />
               <div className="p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold uppercase text-hc-accent">{ev.type}</span>

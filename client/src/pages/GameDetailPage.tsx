@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Server, Building2, MessageCircle, Users, CalendarDays } from 'lucide-react';
+import { CoverImage } from '../components/ui/CoverImage';
 import { gamesApi, serversApi, communitiesApi, lfgApi, eventsApi } from '../api';
 import { ServerCard } from '../components/ui/ServerCard';
 import { LfgCard } from '../components/ui/LfgCard';
@@ -56,7 +57,7 @@ export function GameDetailPage() {
   return (
     <div>
       <div className="relative h-56 md:h-72 -mt-1">
-        <img src={game.coverUrl || ''} className="w-full h-full object-cover" alt={game.name} />
+        <CoverImage src={game.coverUrl} name={game.name} category={game.category} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-hc-bg via-hc-bg/50 to-transparent" />
         <div className="absolute bottom-0 inset-x-0 max-w-6xl mx-auto px-4 pb-5 flex items-end gap-4">
           <img src={game.logoUrl || ''} className="w-16 h-16 rounded-2xl border-2 border-hc-bg bg-hc-surface" alt="" />
@@ -133,7 +134,7 @@ export function GameDetailPage() {
                   {events.map((e) => (
                     <Link key={e.id} to="/events">
                       <GlassCard hover className="p-3 flex items-center gap-3">
-                        <img src={e.imageUrl || ''} className="w-14 h-14 rounded-lg object-cover" alt="" />
+                        <CoverImage src={e.imageUrl} name={e.title} className="w-14 h-14 rounded-lg object-cover shrink-0" />
                         <div className="min-w-0">
                           <p className="font-bold text-white text-sm truncate">{e.title}</p>
                           <p className="text-xs text-gray-500">{formatDateTime(e.startTime)}</p>

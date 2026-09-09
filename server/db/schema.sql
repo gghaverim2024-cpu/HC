@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS games (
   category TEXT NOT NULL DEFAULT 'action',
   cover_url TEXT,
   logo_url TEXT,
+  created_by TEXT REFERENCES users(id),
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -176,6 +177,31 @@ CREATE TABLE IF NOT EXISTS post_comments (
   content TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS reels (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  game_id TEXT REFERENCES games(id),
+  video_url TEXT NOT NULL,
+  caption TEXT DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS reel_likes (
+  reel_id TEXT NOT NULL REFERENCES reels(id),
+  user_id TEXT NOT NULL REFERENCES users(id),
+  PRIMARY KEY (reel_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS reel_comments (
+  id TEXT PRIMARY KEY,
+  reel_id TEXT NOT NULL REFERENCES reels(id),
+  user_id TEXT NOT NULL REFERENCES users(id),
+  content TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_reels_created ON reels(created_at DESC);
 
 CREATE TABLE IF NOT EXISTS notifications (
   id TEXT PRIMARY KEY,

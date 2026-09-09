@@ -1,6 +1,6 @@
 import { apiFetch } from './client';
 import type {
-  PublicUser, Game, HcServer, Community, ChatMessage, LfgEntry, HcEvent, Post, AppNotification, JoinRequest,
+  PublicUser, Game, HcServer, Community, ChatMessage, LfgEntry, HcEvent, Post, AppNotification, JoinRequest, Reel,
 } from '../types';
 
 export const authApi = {
@@ -35,6 +35,8 @@ export const gamesApi = {
     return apiFetch<{ games: Game[] }>(`/games${qs ? `?${qs}` : ''}`);
   },
   get: (idOrSlug: string) => apiFetch<{ game: Game }>(`/games/${idOrSlug}`),
+  create: (data: { name: string; category: string; coverUrl?: string; logoUrl?: string }) =>
+    apiFetch<{ game: Game }>('/games', { method: 'POST', body: data }),
 };
 
 export const serversApi = {
@@ -119,6 +121,22 @@ export const notificationsApi = {
   list: () => apiFetch<{ notifications: AppNotification[]; unreadCount: number }>('/notifications'),
   readAll: () => apiFetch<{ ok: boolean }>('/notifications/read-all', { method: 'POST' }),
   read: (id: string) => apiFetch<{ ok: boolean }>(`/notifications/${id}/read`, { method: 'POST' }),
+};
+
+export const reelsApi = {
+  list: (before?: string) => apiFetch<{ reels: Reel[] }>(`/reels${before ? `?before=${encodeURIComponent(before)}` : ''}`),
+  create: (file: Blob, filename: string, caption: string, gameId?: string) => {
+    const form = new FormData();
+    form.append('video', file, filename);
+    form.append('caption', caption);
+    if (gameId) form.append('gameId', gameId);
+    return apiFetch<{ reel: Reel }>('/reels', { method: 'POST', body: form, isForm: true });
+  },
+  like: (id: string) => apiFetch<{ reel: Reel }>(`/reels/${id}/like`, { method: 'POST' }),
+  comments: (id: string) => apiFetch<{ comments: any[] }>(`/reels/${id}/comments`),
+  comment: (id: string, content: string) =>
+    apiFetch<{ ok: boolean }>(`/reels/${id}/comments`, { method: 'POST', body: { content } }),
+  remove: (id: string) => apiFetch<{ ok: boolean }>(`/reels/${id}`, { method: 'DELETE' }),
 };
 
 export const searchApi = {

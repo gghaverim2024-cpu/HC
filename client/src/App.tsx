@@ -10,6 +10,7 @@ import { GameDetailPage } from './pages/GameDetailPage';
 import { ServersPage } from './pages/ServersPage';
 import { ServerDetailPage } from './pages/ServerDetailPage';
 import { FindPlayersPage } from './pages/FindPlayersPage';
+import { ReelsPage } from './pages/ReelsPage';
 import { ChatPage } from './pages/ChatPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { CommunitiesPage } from './pages/CommunitiesPage';
@@ -45,6 +46,7 @@ export default function App() {
         <Route path="/servers" element={<ServersPage />} />
         <Route path="/servers/:id" element={<ServerDetailPage />} />
         <Route path="/find-players" element={<FindPlayersPage />} />
+        <Route path="/reels" element={<ReelsPage />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/chat/:chatId" element={<ChatPage />} />
         <Route path="/profile/:username" element={<ProfilePage />} />

@@ -4,6 +4,7 @@ import { searchApi } from '../api';
 import { GameCard } from '../components/games/GameCard';
 import { ServerCard } from '../components/ui/ServerCard';
 import { Avatar, GlassCard, SectionHeading, Skeleton, EmptyState } from '../components/ui/Primitives';
+import { CoverImage } from '../components/ui/CoverImage';
 
 export function SearchResultsPage() {
   const [params] = useSearchParams();
@@ -91,7 +92,7 @@ export function SearchResultsPage() {
                 {results.events.map((e: any) => (
                   <Link key={e.id} to="/events">
                     <GlassCard hover className="p-3 flex items-center gap-3">
-                      <img src={e.imageUrl || ''} className="w-12 h-12 rounded-lg object-cover" alt="" />
+                      <CoverImage src={e.imageUrl} name={e.title} className="w-12 h-12 rounded-lg object-cover shrink-0" />
                       <span className="font-semibold text-white text-sm">{e.title}</span>
                     </GlassCard>
                   </Link>

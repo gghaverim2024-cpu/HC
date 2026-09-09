@@ -6,6 +6,7 @@ import { ChatWindow } from '../components/chat/ChatWindow';
 import { VoiceRoom } from '../components/voice/VoiceRoom';
 import { Tabs } from '../components/ui/Tabs';
 import { Button, GlassCard, Skeleton } from '../components/ui/Primitives';
+import { CoverImage } from '../components/ui/CoverImage';
 import { LiveCount } from '../components/ui/LiveCount';
 import { useAuthStore } from '../store/authStore';
 import { useUiStore } from '../store/uiStore';
@@ -61,7 +62,7 @@ export function ServerDetailPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="relative rounded-2xl overflow-hidden h-52 mb-6">
-        <img src={server.imageUrl || ''} className="w-full h-full object-cover" alt={server.name} />
+        <CoverImage src={server.imageUrl} name={server.name} category={server.gameCategory} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-hc-bg via-hc-bg/50 to-transparent" />
         <div className="absolute bottom-4 right-4 left-4 flex items-end justify-between flex-wrap gap-3">
           <div>

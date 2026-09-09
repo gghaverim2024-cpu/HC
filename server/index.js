@@ -28,6 +28,7 @@ import reportRoutes from './routes/reports.js';
 import adminRoutes from './routes/admin.js';
 import aiRoutes from './routes/ai.js';
 import uploadRoutes from './routes/upload.js';
+import reelsRoutes from './routes/reels.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 4000;
@@ -60,6 +61,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/reels', reelsRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 

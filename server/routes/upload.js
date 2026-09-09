@@ -1,23 +1,13 @@
 import { Router } from 'express';
 import multer from 'multer';
 import path from 'node:path';
-import fs from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { nanoid } from 'nanoid';
 import { requireAuth } from '../middleware/auth.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const uploadsDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadsDir),
-  filename: (_req, file, cb) => cb(null, `${nanoid()}${path.extname(file.originalname).slice(0, 10)}`),
-});
+import { uploadBuffer } from '../lib/storage.js';
 
 const ALLOWED = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp']);
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
@@ -28,9 +18,11 @@ const upload = multer({
 
 const router = Router();
 
-router.post('/', requireAuth, upload.single('image'), (req, res) => {
+router.post('/', requireAuth, upload.single('image'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'לא הועלה קובץ' });
-  res.status(201).json({ url: `/uploads/${req.file.filename}` });
+  const ext = path.extname(req.file.originalname).slice(0, 10) || '.jpg';
+  const url = await uploadBuffer(req.file.buffer, `images/${nanoid()}${ext}`, req.file.mimetype);
+  res.status(201).json({ url });
 });
 
 export default router;

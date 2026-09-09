@@ -1,0 +1,338 @@
+[
+  {
+    "name": "Minecraft",
+    "slug": "minecraft",
+    "category": "sandbox",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/thumb/b/be/Minecraft_game_logo_2023.png/500px-Minecraft_game_logo_2023.png",
+    "logoHint": "creeper block"
+  },
+  {
+    "name": "Fortnite",
+    "slug": "fortnite",
+    "category": "battle-royale",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/FortniteLogo.svg/500px-FortniteLogo.svg.png",
+    "logoHint": "battle bus"
+  },
+  {
+    "name": "Brawl Stars",
+    "slug": "brawl-stars",
+    "category": "action",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/thumb/b/b2/Brawl_Stars_logo_2025.svg/500px-Brawl_Stars_logo_2025.svg.png",
+    "logoHint": "star brawler"
+  },
+  {
+    "name": "Roblox",
+    "slug": "roblox",
+    "category": "sandbox",
+    "imageUrl": null,
+    "logoHint": "blocky avatar"
+  },
+  {
+    "name": "Valorant",
+    "slug": "valorant",
+    "category": "fps",
+    "imageUrl": null,
+    "logoHint": "tactical agent"
+  },
+  {
+    "name": "Counter-Strike 2",
+    "slug": "cs2",
+    "category": "fps",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/f/f2/CS2_Cover_Art.jpg",
+    "logoHint": "tactical rifle"
+  },
+  {
+    "name": "EA Sports FC 25",
+    "slug": "ea-fc-25",
+    "category": "sports",
+    "imageUrl": null,
+    "logoHint": "soccer ball"
+  },
+  {
+    "name": "Rocket League",
+    "slug": "rocket-league",
+    "category": "sports",
+    "imageUrl": null,
+    "logoHint": "car and ball"
+  },
+  {
+    "name": "League of Legends",
+    "slug": "league-of-legends",
+    "category": "moba",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/League_of_Legends_2019_vector.svg/500px-League_of_Legends_2019_vector.svg.png",
+    "logoHint": "fantasy shield"
+  },
+  {
+    "name": "Free Fire",
+    "slug": "free-fire",
+    "category": "battle-royale",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/thumb/3/38/Free_Fire_New_Logo.svg/500px-Free_Fire_New_Logo.svg.png",
+    "logoHint": "flame emblem"
+  },
+  {
+    "name": "PUBG Mobile",
+    "slug": "pubg-mobile",
+    "category": "battle-royale",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/4/44/PlayerUnknown's_Battlegrounds_Mobile.webp",
+    "logoHint": "parachute soldier"
+  },
+  {
+    "name": "Call of Duty: Warzone",
+    "slug": "cod-warzone",
+    "category": "battle-royale",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/6/65/COD_Warzone_Cover_Art.jpg",
+    "logoHint": "military squad"
+  },
+  {
+    "name": "Call of Duty: Mobile",
+    "slug": "cod-mobile",
+    "category": "fps",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/0/07/CODM_logo.png",
+    "logoHint": "crossed rifles"
+  },
+  {
+    "name": "Apex Legends",
+    "slug": "apex-legends",
+    "category": "battle-royale",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/d/db/Apex_legends_cover.jpg",
+    "logoHint": "legend squad"
+  },
+  {
+    "name": "Clash Royale",
+    "slug": "clash-royale",
+    "category": "strategy",
+    "imageUrl": null,
+    "logoHint": "royal crown"
+  },
+  {
+    "name": "Clash of Clans",
+    "slug": "clash-of-clans",
+    "category": "strategy",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/5/59/Clash_of_Clans_Logo.png",
+    "logoHint": "barbarian village"
+  },
+  {
+    "name": "Genshin Impact",
+    "slug": "genshin-impact",
+    "category": "rpg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/5/5d/Genshin_Impact_logo.svg",
+    "logoHint": "fantasy anime logo"
+  },
+  {
+    "name": "Among Us",
+    "slug": "among-us",
+    "category": "social",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/9/9a/Among_Us_cover_art.jpg",
+    "logoHint": "red crewmate"
+  },
+  {
+    "name": "Subway Surfers",
+    "slug": "subway-surfers",
+    "category": "arcade",
+    "imageUrl": null,
+    "logoHint": "runner train"
+  },
+  {
+    "name": "Candy Crush Saga",
+    "slug": "candy-crush-saga",
+    "category": "puzzle",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/b/bc/Candy_Crush_logo.png",
+    "logoHint": "candy swirl"
+  },
+  {
+    "name": "8 Ball Pool",
+    "slug": "8-ball-pool",
+    "category": "sports",
+    "imageUrl": null,
+    "logoHint": "billiard ball"
+  },
+  {
+    "name": "Overwatch 2",
+    "slug": "overwatch-2",
+    "category": "fps",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/8/89/Overwatch_2_Steam_artwork.jpg",
+    "logoHint": "hero shooter"
+  },
+  {
+    "name": "Dota 2",
+    "slug": "dota-2",
+    "category": "moba",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/3/31/Dota_2_Steam_artwork.jpg",
+    "logoHint": "fantasy warriors"
+  },
+  {
+    "name": "Grand Theft Auto V",
+    "slug": "gta-v",
+    "category": "action",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/a/a5/Grand_Theft_Auto_V.png",
+    "logoHint": "crime city"
+  },
+  {
+    "name": "World of Warcraft",
+    "slug": "world-of-warcraft",
+    "category": "mmo",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/6/65/World_of_Warcraft.png",
+    "logoHint": "fantasy mmo crest"
+  },
+  {
+    "name": "Mobile Legends: Bang Bang",
+    "slug": "mobile-legends",
+    "category": "moba",
+    "imageUrl": null,
+    "logoHint": "blue moba shield"
+  },
+  {
+    "name": "Stumble Guys",
+    "slug": "stumble-guys",
+    "category": "battle-royale",
+    "imageUrl": null,
+    "logoHint": "colorful jellybean runner"
+  },
+  {
+    "name": "Pokémon GO",
+    "slug": "pokemon-go",
+    "category": "ar",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/0/0f/Pokemon_Go.svg",
+    "logoHint": "pokeball ar"
+  },
+  {
+    "name": "Rainbow Six Siege",
+    "slug": "rainbow-six-siege",
+    "category": "fps",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/4/47/Tom_Clancy's_Rainbow_Six_Siege_cover_art.jpg",
+    "logoHint": "tactical shooter"
+  },
+  {
+    "name": "Helldivers 2",
+    "slug": "helldivers-2",
+    "category": "action",
+    "imageUrl": null,
+    "logoHint": "sci-fi soldier"
+  },
+  {
+    "name": "Street Fighter 6",
+    "slug": "street-fighter-6",
+    "category": "fighting",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/9/94/Street_Fighter_6_box_art.jpg",
+    "logoHint": "fighting fists"
+  },
+  {
+    "name": "Tekken 8",
+    "slug": "tekken-8",
+    "category": "fighting",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/b/b4/Tekken_8_cover_art.jpg",
+    "logoHint": "fighting fists"
+  },
+  {
+    "name": "Mario Kart 8 Deluxe",
+    "slug": "mario-kart-8",
+    "category": "racing",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/b/b5/MarioKart8Boxart.jpg",
+    "logoHint": "kart racing"
+  },
+  {
+    "name": "The Sims 4",
+    "slug": "the-sims-4",
+    "category": "simulation",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/7/7f/Sims4_Rebrand.png",
+    "logoHint": "plumbob diamond"
+  },
+  {
+    "name": "Terraria",
+    "slug": "terraria",
+    "category": "sandbox",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/1/1a/Terraria_Steam_artwork.jpg",
+    "logoHint": "pixel miner"
+  },
+  {
+    "name": "Stardew Valley",
+    "slug": "stardew-valley",
+    "category": "simulation",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/f/fd/Logo_of_Stardew_Valley.png",
+    "logoHint": "farm heart"
+  },
+  {
+    "name": "Destiny 2",
+    "slug": "destiny-2",
+    "category": "fps",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/0/05/Destiny_2_(artwork).jpg",
+    "logoHint": "space guardian"
+  },
+  {
+    "name": "Warframe",
+    "slug": "warframe",
+    "category": "action",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/b/bd/Warframe_Cover_Art.png",
+    "logoHint": "sci-fi warrior"
+  },
+  {
+    "name": "Diablo IV",
+    "slug": "diablo-4",
+    "category": "rpg",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/1/1c/Diablo_IV_cover_art.png",
+    "logoHint": "demon skull"
+  },
+  {
+    "name": "Fall Guys",
+    "slug": "fall-guys",
+    "category": "battle-royale",
+    "imageUrl": null,
+    "logoHint": "jellybean character"
+  },
+  {
+    "name": "Geometry Dash",
+    "slug": "geometry-dash",
+    "category": "arcade",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/f/fd/Geometry_Dash.svg",
+    "logoHint": "neon cube"
+  },
+  {
+    "name": "Brawlhalla",
+    "slug": "brawlhalla",
+    "category": "fighting",
+    "imageUrl": null,
+    "logoHint": "viking brawler"
+  },
+  {
+    "name": "Sea of Thieves",
+    "slug": "sea-of-thieves",
+    "category": "action",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/7/77/Sea_of_thieves_cover_art.jpg",
+    "logoHint": "pirate ship"
+  },
+  {
+    "name": "Palworld",
+    "slug": "palworld",
+    "category": "survival",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/f/fb/Palworld_Steam_artwork.jpg",
+    "logoHint": "creature monster"
+  },
+  {
+    "name": "Teamfight Tactics",
+    "slug": "teamfight-tactics",
+    "category": "strategy",
+    "imageUrl": null,
+    "logoHint": "chess pieces"
+  },
+  {
+    "name": "Ludo King",
+    "slug": "ludo-king",
+    "category": "board",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/c/cf/Ludo_King.png",
+    "logoHint": "dice board"
+  },
+  {
+    "name": "Toca Life World",
+    "slug": "toca-life-world",
+    "category": "casual",
+    "imageUrl": null,
+    "logoHint": "colorful blob"
+  },
+  {
+    "name": "Valheim",
+    "slug": "valheim",
+    "category": "survival",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/7/77/Valheim_2021_logo.jpg",
+    "logoHint": "viking longship"
+  }
+]

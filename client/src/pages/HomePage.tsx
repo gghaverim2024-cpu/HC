@@ -7,6 +7,7 @@ import { GameCard } from '../components/games/GameCard';
 import { ServerCard } from '../components/ui/ServerCard';
 import { LfgCard } from '../components/ui/LfgCard';
 import { Button, SectionHeading, Skeleton } from '../components/ui/Primitives';
+import { CoverImage } from '../components/ui/CoverImage';
 import { usePresenceCount } from '../context/SocketContext';
 import { formatCompactNumber, countdownParts } from '../lib/format';
 import type { Game, HcServer, LfgEntry, HcEvent } from '../types';
@@ -41,7 +42,7 @@ function EventTeaser({ event }: { event: HcEvent }) {
   const c = countdownParts(event.startTime);
   return (
     <div className="glass rounded-xl p-3 flex items-center gap-3">
-      <img src={event.imageUrl || ''} className="w-14 h-14 rounded-lg object-cover shrink-0" alt="" />
+      <CoverImage src={event.imageUrl} name={event.title} className="w-14 h-14 rounded-lg object-cover shrink-0" />
       <div className="min-w-0 flex-1">
         <p className="font-semibold text-white text-sm truncate">{event.title}</p>
         <p className="text-[11px] text-hc-accent font-mono mt-0.5">
