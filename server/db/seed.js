@@ -18,14 +18,14 @@ function daysFromNow(days, hours = 0) {
   return d.toISOString().replace('T', ' ').slice(0, 19);
 }
 
-function seed() {
-  if (get('SELECT id FROM games LIMIT 1')) {
+async function seed() {
+  if (await get('SELECT id FROM games LIMIT 1')) {
     console.log('DB כבר מאותחלת — מדלג על seed.');
     return;
   }
   console.log('🌱 מאתחל את HC Israel (ללא נתוני דמו מזויפים — רק תשתית אמיתית)...');
 
-  ensureAchievementRows();
+  await ensureAchievementRows();
 
   // ---------- real utility accounts ----------
   // HC_Admin: the actual platform-owner account (needed to own official
@@ -33,7 +33,7 @@ function seed() {
   // labeled test-drive login. Neither pretends to be a random real player —
   // there are NO bot/fake user accounts anywhere in this seed.
   const adminId = id();
-  run(
+  await run(
     `INSERT INTO users (id, username, email, phone, password_hash, avatar_url, role, xp, bio, is_online)
      VALUES (?,?,?,?,?,?,?,?,?,0)`,
     [
@@ -50,7 +50,7 @@ function seed() {
   );
 
   const demoId = id();
-  run(
+  await run(
     `INSERT INTO users (id, username, email, phone, password_hash, avatar_url, role, xp, bio, is_online)
      VALUES (?,?,?,?,?,?,?,?,?,0)`,
     [
@@ -68,9 +68,10 @@ function seed() {
 
   // ---------- games catalog (real games, real cover art where verified) ----------
   const catalog = JSON.parse(fs.readFileSync(path.join(__dirname, 'games-catalog.json'), 'utf-8'));
-  const games = catalog.map((g) => {
+  const games = [];
+  for (const g of catalog) {
     const gid = id();
-    run(
+    await run(
       `INSERT INTO games (id, name, slug, category, cover_url, logo_url) VALUES (?,?,?,?,?,?)`,
       [
         gid,
@@ -81,16 +82,17 @@ function seed() {
         `https://api.dicebear.com/7.x/shapes/svg?seed=${g.slug}`,
       ]
     );
-    getOrCreateChat('game', gid, `${g.name} ישראל`);
-    return { ...g, id: gid };
-  });
+    await getOrCreateChat('game', gid, `${g.name} ישראל`);
+    games.push({ ...g, id: gid });
+  }
 
-  getOrCreateChat('global', null, 'Global Chat');
+  await getOrCreateChat('global', null, 'Global Chat');
 
   // ---------- one official HC Israel server per game (real infra, not fake social proof) ----------
-  const servers = games.map((g) => {
+  const servers = [];
+  for (const g of games) {
     const sid = id();
-    run(
+    await run(
       `INSERT INTO servers (id, name, game_id, owner_id, type, image_url, description, max_players, status, rating, tags)
        VALUES (?,?,?,?,'official',?,?,?,?,?,?)`,
       [
@@ -106,9 +108,9 @@ function seed() {
         JSON.stringify([]),
       ]
     );
-    getOrCreateChat('server', sid, `צ'אט HC Official — ${g.name}`);
-    return { id: sid, gameId: g.id };
-  });
+    await getOrCreateChat('server', sid, `צ'אט HC Official — ${g.name}`);
+    servers.push({ id: sid, gameId: g.id });
+  }
 
   // ---------- a few real upcoming official events, organized by the real admin account ----------
   const eventTemplates = [
@@ -119,7 +121,7 @@ function seed() {
   const gameBySlug = Object.fromEntries(games.map((g) => [g.slug, g]));
   for (const e of eventTemplates) {
     const game = e.gameSlug ? gameBySlug[e.gameSlug] : null;
-    run(
+    await run(
       `INSERT INTO events (id, title, description, image_url, type, game_id, organizer_id, start_time)
        VALUES (?,?,?,?,?,?,?,?)`,
       [
@@ -141,4 +143,4 @@ function seed() {
   console.log('   התחברות דמו:    demo / demo1234');
 }
 
-seed();
+await seed();

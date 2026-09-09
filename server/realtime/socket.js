@@ -43,13 +43,19 @@ export function attachSocket(io) {
     next();
   });
 
+  // NOTE: this callback stays synchronous on purpose. Awaiting here before the
+  // socket.on(...) registrations below would leave a window in which inbound
+  // packets arrive with no listener attached and get dropped, so the one DB
+  // write we need on connect is fired off without blocking registration.
   io.on('connection', (socket) => {
     const user = socket.data.user;
     socket.data.scopes = new Set();
 
     if (user) {
       onlineUserIds.add(user.id);
-      run('UPDATE users SET is_online = 1, last_seen = datetime(\'now\') WHERE id = ?', [user.id]);
+      run('UPDATE users SET is_online = 1, last_seen = datetime(\'now\') WHERE id = ?', [user.id]).catch(
+        (err) => console.error('failed to mark user online:', err)
+      );
       socket.join(`user:${user.id}`);
     }
     io.emit('presence:snapshot', snapshot());
@@ -88,50 +94,65 @@ export function attachSocket(io) {
       socket.to(`chat:${chatId}`).emit('typing', { chatId, userId: user.id, username: user.username });
     });
 
-    socket.on('chat:message', (data) => {
+    socket.on('chat:message', async (data) => {
       if (!user) return socket.emit('error:message', { error: 'יש להתחבר כדי לשלוח הודעות' });
       const { chatId, content, imageUrl, replyToId } = data || {};
       if (!chatId || (!content?.trim() && !imageUrl)) return;
       if (!canSendMessage(socket.id)) {
         return socket.emit('error:message', { error: 'לאט מדי, אתה שולח הודעות מהר מדי' });
       }
-      const dbUser = get('SELECT * FROM users WHERE id = ?', [user.id]);
-      if (!dbUser || dbUser.status === 'banned') {
-        return socket.emit('error:message', { error: 'החשבון שלך חסום' });
-      }
-      if (dbUser.status === 'muted') {
-        return socket.emit('error:message', { error: 'אתה מושתק ואינך יכול לשלוח הודעות' });
-      }
-      let finalContent = (content || '').slice(0, 2000);
-      if (containsBlockedContent(finalContent)) finalContent = censor(finalContent);
+      try {
+        const dbUser = await get('SELECT * FROM users WHERE id = ?', [user.id]);
+        if (!dbUser || dbUser.status === 'banned') {
+          return socket.emit('error:message', { error: 'החשבון שלך חסום' });
+        }
+        if (dbUser.status === 'muted') {
+          return socket.emit('error:message', { error: 'אתה מושתק ואינך יכול לשלוח הודעות' });
+        }
+        let finalContent = (content || '').slice(0, 2000);
+        if (containsBlockedContent(finalContent)) finalContent = censor(finalContent);
 
-      const id = nanoid();
-      run(
-        `INSERT INTO chat_messages (id, chat_id, user_id, content, image_url, reply_to_id) VALUES (?,?,?,?,?,?)`,
-        [id, chatId, user.id, finalContent, imageUrl || null, replyToId || null]
-      );
-      run('UPDATE users SET xp = xp + ? WHERE id = ?', [XP_REWARDS.SEND_MESSAGE, user.id]);
+        const id = nanoid();
+        await run(
+          `INSERT INTO chat_messages (id, chat_id, user_id, content, image_url, reply_to_id) VALUES (?,?,?,?,?,?)`,
+          [id, chatId, user.id, finalContent, imageUrl || null, replyToId || null]
+        );
+        await run('UPDATE users SET xp = xp + ? WHERE id = ?', [XP_REWARDS.SEND_MESSAGE, user.id]);
 
-      const saved = get('SELECT * FROM chat_messages WHERE id = ?', [id]);
-      const author = get('SELECT * FROM users WHERE id = ?', [user.id]);
-      io.to(`chat:${chatId}`).emit('chat:message', serializeMessage(saved, author));
+        const saved = await get('SELECT * FROM chat_messages WHERE id = ?', [id]);
+        const author = await get('SELECT * FROM users WHERE id = ?', [user.id]);
+        io.to(`chat:${chatId}`).emit('chat:message', serializeMessage(saved, author));
 
-      const unlocked = checkAndAwardAchievements(user.id);
-      for (const ach of unlocked) {
-        io.to(`user:${user.id}`).emit('achievement:unlocked', ach);
+        const unlocked = await checkAndAwardAchievements(user.id);
+        for (const ach of unlocked) {
+          io.to(`user:${user.id}`).emit('achievement:unlocked', ach);
+        }
+      } catch (err) {
+        console.error('chat:message failed:', err);
+        socket.emit('error:message', { error: 'שליחת ההודעה נכשלה, נסה שוב' });
       }
     });
 
-    socket.on('voice:join', ({ roomKey }) => {
+    socket.on('voice:join', async ({ roomKey }) => {
       if (!user || !roomKey) return socket.emit('error:message', { error: 'יש להתחבר כדי להצטרף לחדר קול' });
       if (socket.data.voiceRoom) return; // already in a voice room
+      // Claim the room synchronously (before the first await) so two rapid
+      // voice:join packets can't both get past the guard above.
       socket.join(`voice:${roomKey}`);
       socket.data.voiceRoom = roomKey;
       if (!voiceRooms.has(roomKey)) voiceRooms.set(roomKey, new Map());
+      let avatarUrl = null;
+      try {
+        avatarUrl = (await get('SELECT avatar_url FROM users WHERE id = ?', [user.id]))?.avatar_url || null;
+      } catch (err) {
+        console.error('voice:join avatar lookup failed:', err);
+      }
+      // The socket may have disconnected or left while we were awaiting.
+      if (socket.data.voiceRoom !== roomKey) return;
       voiceRooms.get(roomKey).set(socket.id, {
         userId: user.id,
         username: user.username,
-        avatarUrl: get('SELECT avatar_url FROM users WHERE id = ?', [user.id])?.avatar_url || null,
+        avatarUrl,
         muted: false,
       });
       io.to(`voice:${roomKey}`).emit('voice:participants', { roomKey, participants: voiceParticipants(roomKey) });
@@ -173,7 +194,11 @@ export function attachSocket(io) {
         );
         if (!stillConnected) {
           onlineUserIds.delete(user.id);
-          run('UPDATE users SET is_online = 0, last_seen = datetime(\'now\') WHERE id = ?', [user.id]);
+          // Fire-and-forget so the presence snapshot below still goes out
+          // immediately, exactly as it did when this write was synchronous.
+          run('UPDATE users SET is_online = 0, last_seen = datetime(\'now\') WHERE id = ?', [user.id]).catch(
+            (err) => console.error('failed to mark user offline:', err)
+          );
         }
       }
       io.emit('presence:snapshot', snapshot());

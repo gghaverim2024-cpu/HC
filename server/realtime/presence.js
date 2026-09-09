@@ -10,10 +10,10 @@ export const knownKeys = new Set();
 // globally connected user ids (socket-authenticated) — real, not simulated
 export const onlineUserIds = new Set();
 
-export function initLiveCounts() {
-  const games = all('SELECT id FROM games');
+export async function initLiveCounts() {
+  const games = await all('SELECT id FROM games');
   for (const g of games) knownKeys.add(`game:${g.id}`);
-  const servers = all('SELECT id FROM servers');
+  const servers = await all('SELECT id FROM servers');
   for (const s of servers) knownKeys.add(`server:${s.id}`);
 }
 

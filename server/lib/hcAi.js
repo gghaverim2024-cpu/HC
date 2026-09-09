@@ -53,9 +53,9 @@ const GAMING_SIGNAL_WORDS = [
   ...Object.values(GAME_ALIASES).flat(),
 ];
 
-function detectGame(text) {
+async function detectGame(text) {
   const lower = text.toLowerCase();
-  const games = all('SELECT * FROM games');
+  const games = await all('SELECT * FROM games');
   for (const game of games) {
     if (lower.includes(game.name.toLowerCase())) return game;
     const aliases = GAME_ALIASES[game.slug] || [];
@@ -74,14 +74,14 @@ function hasAny(lower, hints) {
   return hints.some((h) => lower.includes(h));
 }
 
-function topActiveGames(limit = 3) {
-  const games = all('SELECT * FROM games');
+async function topActiveGames(limit = 3) {
+  const games = await all('SELECT * FROM games');
   const withCounts = games.map((g) => ({ g, count: getCount(`game:${g.id}`) }));
   withCounts.sort((a, b) => b.count - a.count);
   return withCounts.slice(0, limit).map((x) => x.g);
 }
 
-export function answerQuery(rawText, { excludeUserId } = {}) {
+export async function answerQuery(rawText, { excludeUserId } = {}) {
   const text = (rawText || '').trim();
   if (!text) {
     return { reply: 'ספר לי מה אתה מחפש — שרת, קבוצה למשחק, או קהילה, ואני אמצא לך משהו מתאים.', results: [] };
@@ -109,10 +109,10 @@ export function answerQuery(rawText, { excludeUserId } = {}) {
     };
   }
 
-  const game = detectGame(text);
+  const game = await detectGame(text);
 
   if (!game && hasAny(lower, RECOMMEND_GAME_HINTS)) {
-    const top = topActiveGames(3);
+    const top = await topActiveGames(3);
     if (!top.length) return { reply: 'עדיין אין מספיק נתונים כדי להמליץ — נסה שוב מאוחר יותר.', results: [] };
     return {
       reply: `המשחקים הכי פעילים ב-HC Israel כרגע: ${top.map((g) => g.name).join(', ')}. רוצה שאמצא לך שרת או קבוצה לאחד מהם?`,
@@ -139,7 +139,7 @@ export function answerQuery(rawText, { excludeUserId } = {}) {
   const tagKeywords = detectTagKeywords(text);
 
   if (wantsLfg && !wantsServer) {
-    let rows = all(
+    let rows = await all(
       `SELECT lfg.*, u.* FROM looking_for_group lfg
        JOIN users u ON u.id = lfg.user_id
        WHERE lfg.game_id = ? AND lfg.status = 'open' ${excludeUserId ? 'AND lfg.user_id != ?' : ''}
@@ -159,7 +159,7 @@ export function answerQuery(rawText, { excludeUserId } = {}) {
   }
 
   // default: server recommendation
-  let servers = all('SELECT * FROM servers WHERE game_id = ?', [game.id]);
+  let servers = await all('SELECT * FROM servers WHERE game_id = ?', [game.id]);
   if (tagKeywords.length) {
     servers = servers.filter((s) => {
       const tags = JSON.parse(s.tags || '[]').join(' ').toLowerCase();

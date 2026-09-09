@@ -33,12 +33,12 @@ import reelsRoutes from './routes/reels.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 4000;
 
-if (!get('SELECT id FROM games LIMIT 1')) {
+if (!(await get('SELECT id FROM games LIMIT 1'))) {
   console.log('⚠️  לא נמצאו נתונים — מריץ seed אוטומטית...');
   await import('./db/seed.js');
 }
 
-initLiveCounts();
+await initLiveCounts();
 
 const app = express();
 app.use(cors());

@@ -6,10 +6,10 @@ export function setIo(io) {
   ioRef = io;
 }
 
-export function pushNotification(userId, type, payload) {
+export async function pushNotification(userId, type, payload) {
   const id = nanoid();
   const createdAt = new Date().toISOString();
-  run('INSERT INTO notifications (id, user_id, type, payload) VALUES (?,?,?,?)', [
+  await run('INSERT INTO notifications (id, user_id, type, payload) VALUES (?,?,?,?)', [
     id,
     userId,
     type,
