@@ -61,9 +61,15 @@ router.patch('/me', requireAuth, (req, res) => {
   res.json({ user: privateUser(updated) });
 });
 
-router.get('/', (req, res) => {
+router.get('/', optionalAuth, (req, res) => {
+  // Browse real (non-bot) users — used for both the search box and the
+  // "all users" directory. Bots are demo/seed content, not real people.
   const q = (req.query.q || '').toString();
-  const rows = all(`SELECT * FROM users WHERE username LIKE ? LIMIT 20`, [`%${q}%`]);
+  const rows = all(
+    `SELECT * FROM users WHERE is_bot = 0 AND status != 'banned' AND username LIKE ? AND id != ?
+     ORDER BY is_online DESC, last_seen DESC LIMIT 100`,
+    [`%${q}%`, req.user?.id || '']
+  );
   res.json({ users: rows.map(publicUser) });
 });
 

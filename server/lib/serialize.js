@@ -27,7 +27,7 @@ export function publicUser(u) {
 // Includes private fields — only for the authenticated user viewing their own profile.
 export function privateUser(u) {
   if (!u) return null;
-  return { ...publicUser(u), email: u.email };
+  return { ...publicUser(u), email: u.email, phone: u.phone };
 }
 
 export function serializeGame(g, extra = {}) {

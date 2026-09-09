@@ -9,12 +9,15 @@ import { privateUser } from '../lib/serialize.js';
 const router = Router();
 
 router.post('/register', rateLimit({ max: 5, windowMs: 60000 }), (req, res) => {
-  const { username, email, password } = req.body || {};
-  if (!username || !email || !password) {
+  const { username, email, phone, password } = req.body || {};
+  if (!username || !email || !phone || !password) {
     return res.status(400).json({ error: 'חסרים שדות חובה' });
   }
   if (!/^[a-zA-Z0-9_א-ת]{3,20}$/.test(username)) {
     return res.status(400).json({ error: 'שם משתמש חייב להיות 3-20 תווים (אותיות/מספרים/קו תחתון)' });
+  }
+  if (!/^0\d{8,9}$/.test(phone.replace(/[\s-]/g, ''))) {
+    return res.status(400).json({ error: 'מספר טלפון לא תקין (לדוגמה 0501234567)' });
   }
   if (password.length < 6) {
     return res.status(400).json({ error: 'הסיסמה חייבת להכיל לפחות 6 תווים' });
@@ -29,8 +32,15 @@ router.post('/register', rateLimit({ max: 5, windowMs: 60000 }), (req, res) => {
   const id = nanoid();
   const passwordHash = bcrypt.hashSync(password, 10);
   run(
-    `INSERT INTO users (id, username, email, password_hash, avatar_url, role) VALUES (?,?,?,?,?, 'user')`,
-    [id, username, email, passwordHash, `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(username)}`]
+    `INSERT INTO users (id, username, email, phone, password_hash, avatar_url, role) VALUES (?,?,?,?,?,?, 'user')`,
+    [
+      id,
+      username,
+      email,
+      phone.replace(/[\s-]/g, ''),
+      passwordHash,
+      `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(username)}`,
+    ]
   );
   const user = get('SELECT * FROM users WHERE id = ?', [id]);
   const token = signToken(user);

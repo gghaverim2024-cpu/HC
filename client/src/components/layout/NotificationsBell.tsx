@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bell, UserPlus, Gamepad2, MessageSquare, Trophy, Users } from 'lucide-react';
+import { Bell, UserPlus, Gamepad2, MessageSquare, Trophy, Users, Building2, CheckCircle2, XCircle } from 'lucide-react';
 import { notificationsApi } from '../../api';
 import { useSocket } from '../../context/SocketContext';
 import { useAuthStore } from '../../store/authStore';
@@ -14,6 +14,9 @@ const ICONS: Record<string, any> = {
   achievement: Trophy,
   message: MessageSquare,
   game: Gamepad2,
+  join_request: Building2,
+  join_approved: CheckCircle2,
+  join_rejected: XCircle,
 };
 
 function notifText(n: AppNotification): string {
@@ -22,6 +25,12 @@ function notifText(n: AppNotification): string {
       return `${n.payload.fromUsername} שלח לך בקשת חברות`;
     case 'group_invite':
       return `${n.payload.fromUsername} הזמין אותך להצטרף לקבוצה`;
+    case 'join_request':
+      return `${n.payload.fromUsername} ביקש להצטרף לקהילה "${n.payload.communityName}"`;
+    case 'join_approved':
+      return `בקשת ההצטרפות שלך ל-"${n.payload.communityName}" אושרה!`;
+    case 'join_rejected':
+      return `בקשת ההצטרפות שלך ל-"${n.payload.communityName}" נדחתה`;
     default:
       return 'התראה חדשה';
   }
@@ -108,6 +117,9 @@ export function NotificationsBell() {
                     onClick={() => {
                       setOpen(false);
                       if (n.type === 'friend_request') navigate('/settings?tab=friends');
+                      if (n.type === 'join_request' || n.type === 'join_approved' || n.type === 'join_rejected') {
+                        navigate(`/communities/${n.payload.communityId}?tab=requests`);
+                      }
                     }}
                     className={`w-full text-right flex items-start gap-3 px-4 py-3 border-b border-hc-border/50 hover:bg-white/5 transition-colors ${
                       !n.read ? 'bg-hc-primary/5' : ''

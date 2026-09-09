@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bell, UserPlus, Users, Trophy, MessageSquare } from 'lucide-react';
+import { Bell, UserPlus, Users, Trophy, MessageSquare, Building2, CheckCircle2, XCircle } from 'lucide-react';
 import { notificationsApi } from '../api';
 import { GlassCard, Skeleton, EmptyState } from '../components/ui/Primitives';
 import { timeAgo } from '../lib/format';
@@ -10,6 +10,9 @@ const ICONS: Record<string, any> = {
   group_invite: Users,
   achievement: Trophy,
   message: MessageSquare,
+  join_request: Building2,
+  join_approved: CheckCircle2,
+  join_rejected: XCircle,
 };
 
 function notifText(n: AppNotification): string {
@@ -18,6 +21,12 @@ function notifText(n: AppNotification): string {
       return `${n.payload.fromUsername} שלח לך בקשת חברות`;
     case 'group_invite':
       return `${n.payload.fromUsername} הזמין אותך להצטרף לקבוצה`;
+    case 'join_request':
+      return `${n.payload.fromUsername} ביקש להצטרף לקהילה "${n.payload.communityName}"`;
+    case 'join_approved':
+      return `בקשת ההצטרפות שלך ל-"${n.payload.communityName}" אושרה!`;
+    case 'join_rejected':
+      return `בקשת ההצטרפות שלך ל-"${n.payload.communityName}" נדחתה`;
     default:
       return 'התראה חדשה';
   }

@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   username TEXT UNIQUE NOT NULL,
   email TEXT UNIQUE NOT NULL,
+  phone TEXT NOT NULL DEFAULT '',
   password_hash TEXT NOT NULL,
   avatar_url TEXT,
   banner_url TEXT,
@@ -61,6 +62,15 @@ CREATE TABLE IF NOT EXISTS communities (
   logo_url TEXT,
   banner_url TEXT,
   description TEXT DEFAULT '',
+  is_private INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS community_join_requests (
+  id TEXT PRIMARY KEY,
+  community_id TEXT NOT NULL REFERENCES communities(id),
+  user_id TEXT NOT NULL REFERENCES users(id),
+  status TEXT NOT NULL DEFAULT 'pending', -- pending|approved|rejected
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

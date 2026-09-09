@@ -1,10 +1,10 @@
 import { apiFetch } from './client';
 import type {
-  PublicUser, Game, HcServer, Community, ChatMessage, LfgEntry, HcEvent, Post, AppNotification,
+  PublicUser, Game, HcServer, Community, ChatMessage, LfgEntry, HcEvent, Post, AppNotification, JoinRequest,
 } from '../types';
 
 export const authApi = {
-  register: (data: { username: string; email: string; password: string }) =>
+  register: (data: { username: string; email: string; phone: string; password: string }) =>
     apiFetch<{ token: string; user: PublicUser }>('/auth/register', { method: 'POST', body: data }),
   login: (data: { usernameOrEmail: string; password: string }) =>
     apiFetch<{ token: string; user: PublicUser }>('/auth/login', { method: 'POST', body: data }),
@@ -55,10 +55,15 @@ export const communitiesApi = {
     return apiFetch<{ communities: Community[] }>(`/communities${qs ? `?${qs}` : ''}`);
   },
   get: (id: string) => apiFetch<{ community: Community }>(`/communities/${id}`),
-  create: (data: { name: string; description?: string; gameId?: string; logoUrl?: string; bannerUrl?: string }) =>
+  create: (data: { name: string; description?: string; gameId?: string; logoUrl?: string; bannerUrl?: string; isPrivate?: boolean }) =>
     apiFetch<{ community: Community }>('/communities', { method: 'POST', body: data }),
-  join: (id: string) => apiFetch<{ ok: boolean; unlocked: any[] }>(`/communities/${id}/join`, { method: 'POST' }),
+  join: (id: string) => apiFetch<{ ok: boolean; pending?: boolean; unlocked: any[] }>(`/communities/${id}/join`, { method: 'POST' }),
   leave: (id: string) => apiFetch<{ ok: boolean }>(`/communities/${id}/leave`, { method: 'POST' }),
+  joinRequests: (id: string) => apiFetch<{ requests: JoinRequest[] }>(`/communities/${id}/join-requests`),
+  approveJoinRequest: (id: string, requestId: string) =>
+    apiFetch<{ ok: boolean }>(`/communities/${id}/join-requests/${requestId}/approve`, { method: 'POST' }),
+  rejectJoinRequest: (id: string, requestId: string) =>
+    apiFetch<{ ok: boolean }>(`/communities/${id}/join-requests/${requestId}/reject`, { method: 'POST' }),
   members: (id: string) => apiFetch<{ members: any[] }>(`/communities/${id}/members`),
 };
 

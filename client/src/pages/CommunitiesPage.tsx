@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Users } from 'lucide-react';
+import { Plus, Users, Lock } from 'lucide-react';
 import { communitiesApi, gamesApi } from '../api';
 import { Button, GlassCard, Skeleton, EmptyState } from '../components/ui/Primitives';
 import { Modal } from '../components/ui/Modal';
@@ -14,7 +14,7 @@ export function CommunitiesPage() {
   const [communities, setCommunities] = useState<Community[] | null>(null);
   const [games, setGames] = useState<Game[]>([]);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: '', description: '', gameId: '' });
+  const [form, setForm] = useState({ name: '', description: '', gameId: '', isPrivate: false });
 
   function reload() {
     communitiesApi.list().then((r) => setCommunities(r.communities));
@@ -31,13 +31,14 @@ export function CommunitiesPage() {
     await communitiesApi.create(form);
     pushToast({ title: 'הקהילה נוצרה בהצלחה!', variant: 'success' });
     setOpen(false);
-    setForm({ name: '', description: '', gameId: '' });
+    setForm({ name: '', description: '', gameId: '', isPrivate: false });
     reload();
   }
 
   async function joinCommunity(id: string) {
     const r = await communitiesApi.join(id);
     reload();
+    if (r.pending) pushToast({ title: 'בקשת ההצטרפות נשלחה, ממתין לאישור מנהל הקהילה', variant: 'success' });
     r.unlocked?.forEach((a: any) => pushToast({ title: `הישג נפתח: ${a.name}`, icon: a.icon, variant: 'success' }));
   }
 
@@ -71,8 +72,8 @@ export function CommunitiesPage() {
               <div className="p-4">
                 <div className="flex items-center gap-3">
                   <img src={c.logoUrl || ''} className="w-11 h-11 rounded-xl -mt-8 border-2 border-hc-surface" alt="" />
-                  <Link to={`/communities/${c.id}`} className="font-bold text-white text-sm hover:underline">
-                    {c.name}
+                  <Link to={`/communities/${c.id}`} className="font-bold text-white text-sm hover:underline flex items-center gap-1.5">
+                    {c.name} {c.isPrivate && <Lock size={12} className="text-hc-warn" />}
                   </Link>
                 </div>
                 <p className="text-xs text-gray-400 mt-2 line-clamp-2">{c.description}</p>
@@ -80,11 +81,12 @@ export function CommunitiesPage() {
                   <span className="flex items-center gap-1 text-xs text-gray-500">
                     <Users size={13} /> {c.members} חברים
                   </span>
-                  {user && !c.isMember && (
+                  {user && !c.isMember && !c.pendingRequest && (
                     <Button size="sm" variant="secondary" onClick={() => joinCommunity(c.id)}>
-                      הצטרף
+                      {c.isPrivate ? 'בקש להצטרף' : 'הצטרף'}
                     </Button>
                   )}
+                  {user && c.pendingRequest && <span className="text-xs text-hc-warn">ממתין לאישור</span>}
                 </div>
               </div>
             </GlassCard>
@@ -119,6 +121,15 @@ export function CommunitiesPage() {
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             className="w-full bg-white/5 border border-hc-border rounded-xl px-4 py-2.5 text-sm text-white h-20"
           />
+          <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.isPrivate}
+              onChange={(e) => setForm({ ...form, isPrivate: e.target.checked })}
+              className="rounded"
+            />
+            קהילה פרטית — הצטרפות תדרוש אישור מנהל
+          </label>
           <Button type="submit" className="w-full">
             צור קהילה
           </Button>

@@ -63,10 +63,26 @@ export interface Community {
   logoUrl: string | null;
   bannerUrl: string | null;
   description: string;
+  isPrivate: boolean;
   createdAt: string;
   members: number;
   isMember: boolean;
+  pendingRequest: boolean;
   chatId?: string;
+}
+
+export interface JoinRequest {
+  id: string;
+  createdAt: string;
+  user: { id: string; username: string; avatarUrl: string | null };
+}
+
+export interface VoiceParticipant {
+  socketId: string;
+  userId: string;
+  username: string;
+  avatarUrl: string | null;
+  muted: boolean;
 }
 
 export interface ChatMessage {

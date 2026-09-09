@@ -25,12 +25,13 @@ function seed() {
   // ---------- users ----------
   const adminId = id();
   run(
-    `INSERT INTO users (id, username, email, password_hash, avatar_url, role, xp, bio, is_online)
-     VALUES (?,?,?,?,?,?,?,?,0)`,
+    `INSERT INTO users (id, username, email, phone, password_hash, avatar_url, role, xp, bio, is_online)
+     VALUES (?,?,?,?,?,?,?,?,?,0)`,
     [
       adminId,
       'HC_Admin',
       'admin@hcisrael.co.il',
+      '0500000000',
       bcrypt.hashSync('admin123', 10),
       'https://api.dicebear.com/7.x/adventurer/svg?seed=HC_Admin',
       'owner',
@@ -41,12 +42,13 @@ function seed() {
 
   const demoId = id();
   run(
-    `INSERT INTO users (id, username, email, password_hash, avatar_url, role, xp, bio, is_online)
-     VALUES (?,?,?,?,?,?,?,?,0)`,
+    `INSERT INTO users (id, username, email, phone, password_hash, avatar_url, role, xp, bio, is_online)
+     VALUES (?,?,?,?,?,?,?,?,?,0)`,
     [
       demoId,
       'demo',
       'demo@hcisrael.co.il',
+      '0501111111',
       bcrypt.hashSync('demo1234', 10),
       'https://api.dicebear.com/7.x/adventurer/svg?seed=demo_player',
       'verified',
@@ -167,14 +169,14 @@ function seed() {
   const communityTemplates = [
     { slug: 'minecraft', name: 'קהילת מיינקראפט ישראל', desc: 'הבית של בוני העולם הישראלים.' },
     { slug: 'fortnite', name: 'Fortnite IL Squad', desc: 'קהילה לתחרויות ולמשחק משותף.' },
-    { slug: 'valorant', name: 'Valorant Israel Esports', desc: 'קהילת אסטרטגיה ותחרויות דירוג.' },
+    { slug: 'valorant', name: 'Valorant Israel Esports', desc: 'קהילת אסטרטגיה ותחרויות דירוג (פרטית — דורשת אישור הצטרפות).', isPrivate: true },
   ];
   const communities = communityTemplates.map((c) => {
     const game = gameBySlug[c.slug];
     const cid = id();
     const ownerId = botIds[Math.floor(Math.random() * botIds.length)];
     run(
-      `INSERT INTO communities (id, name, game_id, owner_id, logo_url, banner_url, description) VALUES (?,?,?,?,?,?,?)`,
+      `INSERT INTO communities (id, name, game_id, owner_id, logo_url, banner_url, description, is_private) VALUES (?,?,?,?,?,?,?,?)`,
       [
         cid,
         c.name,
@@ -183,6 +185,7 @@ function seed() {
         `https://api.dicebear.com/7.x/shapes/svg?seed=${c.slug}-community`,
         `https://picsum.photos/seed/${c.slug}-banner/1200/300`,
         c.desc,
+        c.isPrivate ? 1 : 0,
       ]
     );
     run('INSERT INTO community_members (community_id, user_id, role) VALUES (?,?,\'owner\')', [cid, ownerId]);

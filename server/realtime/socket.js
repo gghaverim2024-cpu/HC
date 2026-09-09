@@ -10,6 +10,16 @@ import { checkAndAwardAchievements } from '../lib/achievements.js';
 
 const msgTimestamps = new Map(); // socketId -> timestamps[]
 
+// voiceRooms[roomKey] = Map<socketId, { userId, username, avatarUrl, muted }>
+// Purely in-memory/ephemeral — voice rooms are live-only, nothing is persisted.
+const voiceRooms = new Map();
+
+function voiceParticipants(roomKey) {
+  const room = voiceRooms.get(roomKey);
+  if (!room) return [];
+  return [...room.entries()].map(([socketId, p]) => ({ socketId, ...p }));
+}
+
 function canSendMessage(socketId) {
   const now = Date.now();
   const arr = (msgTimestamps.get(socketId) || []).filter((t) => now - t < 4000);
@@ -112,8 +122,51 @@ export function attachSocket(io) {
       }
     });
 
+    socket.on('voice:join', ({ roomKey }) => {
+      if (!user || !roomKey) return socket.emit('error:message', { error: 'יש להתחבר כדי להצטרף לחדר קול' });
+      if (socket.data.voiceRoom) return; // already in a voice room
+      socket.join(`voice:${roomKey}`);
+      socket.data.voiceRoom = roomKey;
+      if (!voiceRooms.has(roomKey)) voiceRooms.set(roomKey, new Map());
+      voiceRooms.get(roomKey).set(socket.id, {
+        userId: user.id,
+        username: user.username,
+        avatarUrl: get('SELECT avatar_url FROM users WHERE id = ?', [user.id])?.avatar_url || null,
+        muted: false,
+      });
+      io.to(`voice:${roomKey}`).emit('voice:participants', { roomKey, participants: voiceParticipants(roomKey) });
+    });
+
+    socket.on('voice:leave', ({ roomKey }) => {
+      if (!roomKey || socket.data.voiceRoom !== roomKey) return;
+      socket.leave(`voice:${roomKey}`);
+      voiceRooms.get(roomKey)?.delete(socket.id);
+      socket.data.voiceRoom = null;
+      io.to(`voice:${roomKey}`).emit('voice:participants', { roomKey, participants: voiceParticipants(roomKey) });
+    });
+
+    socket.on('voice:mute', ({ roomKey, muted }) => {
+      const room = voiceRooms.get(roomKey);
+      const entry = room?.get(socket.id);
+      if (!entry) return;
+      entry.muted = !!muted;
+      io.to(`voice:${roomKey}`).emit('voice:participants', { roomKey, participants: voiceParticipants(roomKey) });
+    });
+
+    // WebRTC signaling relay (mesh topology) — server never touches media,
+    // it only forwards offers/answers/ICE candidates between two peers.
+    socket.on('voice:signal', ({ roomKey, toSocketId, data }) => {
+      if (!toSocketId || !data) return;
+      io.to(toSocketId).emit('voice:signal', { roomKey, fromSocketId: socket.id, data });
+    });
+
     socket.on('disconnect', () => {
       for (const key of socket.data.scopes) bumpReal(key, -1);
+      if (socket.data.voiceRoom) {
+        const roomKey = socket.data.voiceRoom;
+        voiceRooms.get(roomKey)?.delete(socket.id);
+        io.to(`voice:${roomKey}`).emit('voice:participants', { roomKey, participants: voiceParticipants(roomKey) });
+      }
       if (user) {
         const stillConnected = [...io.sockets.sockets.values()].some(
           (s) => s.data.user?.id === user.id

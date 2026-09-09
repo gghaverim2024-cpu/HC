@@ -5,7 +5,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "node --watch index.js",
+    "dev": "node --watch-path=routes --watch-path=lib --watch-path=realtime --watch-path=middleware --watch-path=db --watch-path=index.js index.js",
     "start": "node index.js",
     "seed": "node db/seed.js"
   },

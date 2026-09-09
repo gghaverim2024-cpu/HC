@@ -11,6 +11,7 @@ export function RegisterPage() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
@@ -18,7 +19,7 @@ export function RegisterPage() {
     e.preventDefault();
     setError('');
     try {
-      await register(username, email, password);
+      await register(username, email, phone, password);
       navigate('/', { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'שגיאה בהרשמה');
@@ -38,6 +39,15 @@ export function RegisterPage() {
           maxLength={20}
         />
         <FormField label="אימייל" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <FormField
+          label="מספר טלפון"
+          type="tel"
+          placeholder="0501234567"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          required
+          pattern="0\d{8,9}"
+        />
         <FormField
           label="סיסמה"
           type="password"

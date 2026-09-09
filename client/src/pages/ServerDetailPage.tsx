@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, Crown, Plug, Heart, HeartOff, Users } from 'lucide-react';
+import { Star, Crown, Plug, Heart, HeartOff, Users, MessageCircle, Volume2 } from 'lucide-react';
 import { serversApi, gamesApi } from '../api';
 import { ChatWindow } from '../components/chat/ChatWindow';
+import { VoiceRoom } from '../components/voice/VoiceRoom';
+import { Tabs } from '../components/ui/Tabs';
 import { Button, GlassCard, Skeleton } from '../components/ui/Primitives';
 import { LiveCount } from '../components/ui/LiveCount';
 import { useAuthStore } from '../store/authStore';
@@ -17,6 +19,7 @@ export function ServerDetailPage() {
   const [server, setServer] = useState<HcServer | null>(null);
   const [game, setGame] = useState<Game | null>(null);
   const [connected, setConnected] = useState(false);
+  const [rightTab, setRightTab] = useState<'chat' | 'voice'>('chat');
   const chatRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -125,7 +128,18 @@ export function ServerDetailPage() {
         </div>
 
         <div ref={chatRef} className="md:col-span-2">
-          {server.chatId && <ChatWindow chatId={server.chatId} className="h-[60vh]" />}
+          <div className="mb-3">
+            <Tabs
+              tabs={[
+                { key: 'chat', label: "צ'אט", icon: <MessageCircle size={15} /> },
+                { key: 'voice', label: 'קול', icon: <Volume2 size={15} /> },
+              ]}
+              active={rightTab}
+              onChange={(k) => setRightTab(k as 'chat' | 'voice')}
+            />
+          </div>
+          {rightTab === 'chat' && server.chatId && <ChatWindow chatId={server.chatId} className="h-[60vh]" />}
+          {rightTab === 'voice' && <VoiceRoom roomKey={`server:${server.id}`} title={`חדר קול — ${server.name}`} />}
         </div>
       </div>
     </div>
